@@ -1,0 +1,77 @@
+/* Custom styles to enhance the Bootstrap theme */
+
+/* Content boxes for generated text */
+.content-box {
+    position: relative;
+    padding: 1rem;
+    background-color: var(--bs-dark);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+}
+
+.content-box:hover {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.content-box p {
+    margin-bottom: 2rem;
+    word-wrap: break-word;
+}
+
+.content-box .copy-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+/* Accordion customization */
+.accordion-button:not(.collapsed) {
+    background-color: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary);
+    font-weight: 500;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: var(--bs-border-color);
+}
+
+/* Form elements */
+textarea.form-control:focus,
+select.form-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .display-5 {
+        font-size: 1.75rem;
+    }
+    
+    .lead {
+        font-size: 1rem;
+    }
+    
+    .accordion-button {
+        padding: 0.75rem;
+    }
+}
+
+/* Add an icon for tattoo */
+.fa-tattoo:before {
+    content: "\f0fa";
+}
+
+/* Custom transition for copy button feedback */
+.copy-btn {
+    transition: all 0.3s ease;
+}
+
+/* Results section spacing */
+.results-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--bs-border-color);
+}

@@ -1,0 +1,123 @@
+from flask import Flask, request, render_template_string
+import openai
+import os
+
+app = Flask(__name__)
+openai.api_key = os.environ.get("OPENAI_API_KEY")
+
+HTML = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tattoo Caption + Marketing Generator</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #f5f5f5; }
+    input, select, button, textarea { margin-top: 1rem; width: 100%; padding: 10px; }
+    .result { margin-top: 2rem; background: #fff; padding: 1rem; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h2>Tattoo Caption + Marketing Generator</h2>
+  <form method="post">
+    <label>Describe your tattoo design:</label>
+    <input name="description" placeholder="e.g. realistic rabbit with flowers, black and grey style" required>
+
+    <label>Select language for the output:</label>
+    <select name="language">
+      <option value="English">English</option>
+      <option value="Dutch">Dutch</option>
+    </select>
+
+    <button type="submit">Generate All</button>
+  </form>
+
+  {% if output %}
+  <div class="result">
+    <h3>Instagram Caption:</h3>
+    <p>{{ output.caption }}</p>
+
+    <h3>Facebook Post:</h3>
+    <p>{{ output.facebook }}</p>
+
+    <h3>Pinterest Title:</h3>
+    <p>{{ output.pin_title }}</p>
+
+    <h3>Pinterest Description:</h3>
+    <p>{{ output.pin_desc }}</p>
+
+    <h3>Pinterest Hashtags:</h3>
+    <p>{{ output.pin_tags }}</p>
+
+    <h3>Alt Text for Image:</h3>
+    <p>{{ output.alt_text }}</p>
+
+    <h3>SEO Product Title:</h3>
+    <p>{{ output.seo_title }}</p>
+  </div>
+  {% endif %}
+</body>
+</html>
+'''
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    output = None
+    if request.method == "POST":
+        desc = request.form["description"]
+        lang = request.form["language"]
+
+        prompt = f"""
+You are a marketing expert for a tattoo brand. Based on the following tattoo description, generate the following in {lang}:
+
+1. A catchy Instagram caption (max 2 sentences)
+2. A Facebook post caption (slightly longer, informal, with call-to-action)
+3. A Pinterest title
+4. A short Pinterest description
+5. 20 Pinterest hashtags
+6. Alt-text for the image
+7. An SEO-friendly product title (for Etsy/Whop)
+
+Tattoo description: {desc}
+"""
+
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=800
+        )
+
+        text = response["choices"][0]["message"]["content"]
+        lines = text.strip().split("\n")
+        parts = {
+            "caption": "",
+            "facebook": "",
+            "pin_title": "",
+            "pin_desc": "",
+            "pin_tags": "",
+            "alt_text": "",
+            "seo_title": ""
+        }
+
+        for line in lines:
+            if "instagram" in line.lower():
+                parts["caption"] = line.split(":", 1)[1].strip()
+            elif "facebook" in line.lower():
+                parts["facebook"] = line.split(":", 1)[1].strip()
+            elif "pinterest title" in line.lower():
+                parts["pin_title"] = line.split(":", 1)[1].strip()
+            elif "description" in line.lower() and "pinterest" in line.lower():
+                parts["pin_desc"] = line.split(":", 1)[1].strip()
+            elif "hashtags" in line.lower():
+                parts["pin_tags"] = line.split(":", 1)[1].strip()
+            elif "alt" in line.lower():
+                parts["alt_text"] = line.split(":", 1)[1].strip()
+            elif "seo" in line.lower():
+                parts["seo_title"] = line.split(":", 1)[1].strip()
+
+        output = parts
+
+    return render_template_string(HTML, output=output)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=81)
