@@ -23,22 +23,19 @@ def index():
         try:
             description = request.form.get("description", "").strip()
             language = request.form.get("language", "English")
-            
-            # Validate inputs
+
             if not description:
                 flash("Please provide a tattoo description.", "danger")
-                return render_template("index.html")
-                
-            # Generate content using OpenAI
+
             content = generate_marketing_content(description, language)
             return render_template("index.html", output=content, description=description, language=language)
-            
+
         except Exception as e:
-            logging.error(f"Error generating content: {str(e)}")
             flash(f"An error occurred: {str(e)}", "danger")
             return render_template("index.html")
-    
+
     return render_template("index.html")
+
 
 def generate_marketing_content(description, language):
     """Generate tattoo marketing content using OpenAI's API"""
